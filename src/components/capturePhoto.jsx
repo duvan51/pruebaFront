@@ -13,6 +13,8 @@ const CameraComponent = () => {
     setImage(imageSrc);
   };
 
+ // console.log("")
+
   return (
     <>
       <button
