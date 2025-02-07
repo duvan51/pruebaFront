@@ -1,0 +1,9 @@
+DELETE https://www.4sides.com.mx/api/prueba-tecnica/usuarios/eliminar
+Content-Type: application/json
+
+{
+  "usuarioTelefono": "mateo.morales@example.com"
+}
+###
+
+DELETE https://www.4sides.com.mx/api/prueba-tecnica/usuarios/mateo.morales@example.com

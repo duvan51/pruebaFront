@@ -6,10 +6,12 @@ import { RiDeleteBin6Fill } from "react-icons/ri";
 import { BsArrowLeft } from "react-icons/bs";
 import { BsArrowRight } from "react-icons/bs";
 
+
+import { motion, AnimatePresence } from "framer-motion";
 //uso de la camara
 import CameraComponent from "../components/capturePhoto.jsx";
 
-const DataTable = () => {
+const DataTable = (props) => {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
 
@@ -22,7 +24,17 @@ const DataTable = () => {
       try {
         const response = await GetAllUsers();
         const usuarios = Array.isArray(response.data.usuarios) ? response.data.usuarios : [];
-        setData(usuarios);
+        //setData(usuarios);
+
+
+        //cargar imagenes de local
+        const usersImage = JSON.parse(localStorage.getItem("users")) || [];
+        
+        const userAndImages = usuarios.map(user=>{
+          const filterUserEmail = usersImage.find(local => local.email === user.usuarioTelefono);
+          return {...user, photo: filterUserEmail? filterUserEmail.photo: null }
+        })
+        setData(userAndImages)
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -31,17 +43,43 @@ const DataTable = () => {
     fetchUserData();
   }, []);
 
+
+
+//guardar y relacionar las fotos con la data
+const handleCapture = (email, image) => {
+  // Obtener imágenes existentes en localStorage
+  const usersImage = JSON.parse(localStorage.getItem("users")) || [];
+
+  // Actualizar la imagen solo del usuario correspondiente
+  const upDateUser = usersImage.filter(user => user.email !== email);
+  upDateUser.push({ email, photo: image });
+
+  // Guardar en localStorage
+  localStorage.setItem("users", JSON.stringify(upDateUser));
+
+  // Actualizar el estado local
+  setData(prevData => prevData.map(user => 
+    user.usuarioTelefono === email ? { ...user, photo: image } : user
+  ));
+};
+
+//quitar ascentos tildes y demas
+const normalizeText = (text) => {
+  return text
+    .normalize("NFD") //aqui descompongo los ascentos
+    .replace(/[\u0300-\u036f]/g, "") // aqui elimino tildes
+    .toUpperCase(); // convierto todo a mayuscula
+};
   const filteredData = data.filter((x)=>{
-    const filterBy = `${x?.usuarioNombre || ""} ${x?.usuarioApellidoPaterno || ""} ${x?.usuarioApellidoMaterno}`.toUpperCase();
+    const filterBy = normalizeText(`${x?.usuarioNombre || ""} ${x?.usuarioApellidoPaterno || ""} ${x?.usuarioApellidoMaterno}`.toUpperCase())
     const datos = filterBy.includes(search.toUpperCase())
     return datos
   })
 
+
   const handleChange = (event) => {
     setSearch(event.target.value);
   };
-
-
 
   const inFinal = currentPage * dataQt;
   const inInicial = inFinal - dataQt;
@@ -51,74 +89,165 @@ const DataTable = () => {
 
 
 
+  //deleted usuarios
+  const removeItem = (email)=>{
+    const upDateUserDeleted = data.filter(user=> user.usuarioTelefono !== email);
+    //actualizando los usuarios en memoria
+    setData(upDateUserDeleted)
+     // actualizando el localStorage
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+    }
+
+
 
   return (
     <>
-    <div className="bg-white p-3">
+    <div className={`p-3 bg-${props.mode} w-100`}>
       <div className="mb-4"> 
-        <label htmlFor="exampleDataList" className="form-label">Buscar Usuario</label>
         <input
-          className="form-control"
+          className={`
+              form-control 
+              ${props.mode === "dark" ? "dark-mode text-white" : "bg-light text-black"} 
+          `}
+          style=
+            {props.mode === "dark" ? { backgroundColor: "#5F6368", border: "none", outline: "none", boxShadow: "none"} : {}}
           id="exampleDataList"
           placeholder="Escribe un nombre..."
           onChange={handleChange}
           value={search}
         />
       </div>
-      {/**aqui va el formato tablet - escritorio*/}
-      <table className="table d-none">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>Teléfono</th>
-            <th>Email</th>
+      {/**aqui va el formato tablet - escritorio   table-dark*/}
+      <div className="w-100">
+        <div className="table-responsive">
+        <table 
+          className={`
+            ${props.mode === "dark" ? "table-dark table  table-bordered table-responsive w-100 d-none d-md-table" : "table  table-bordered table-responsive w-100 d-none d-md-table"} 
+        `}
+          style={props.mode === "dark" ? { backgroundColor: "#28292A", color: "#fff" } : {}}
+        >
+        <thead className="w-100">
+          <tr className="w-full">
+            <th
+            style=
+            {props.mode === "dark" ? { backgroundColor: "#28292A"} : {}}
+            >#</th>
+            <th
+            style=
+            {props.mode === "dark" ? { backgroundColor: "#28292A"} : {}}
+            >Nombre</th>
+            <th
+            style=
+            {props.mode === "dark" ? { backgroundColor: "#28292A"} : {}}
+            >Teléfono</th>
+            <th
+            style=
+            {props.mode === "dark" ? { backgroundColor: "#28292A"} : {}}
+            >Email</th>
+            <th
+            style=
+            {props.mode === "dark" ? { backgroundColor: "#28292A"} : {}}
+            >Foto</th>
+            <th
+            style=
+            {props.mode === "dark" ? { backgroundColor: "#28292A"} : {}}
+            >Foto</th>
           </tr>
         </thead>
-        <tbody>
-          {filteredData.map((user, index) => (
-            <tr key={index}>
-              <td>{index + 1}</td>
+        <tbody className="w-100 rounded-1">
+        <AnimatePresence>
+          {nData.map((user, index) => (
+            <motion.tr  key={user.usuarioTelefono}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.4 }}
+            layout
+            className="rounded-1"
+            >
+              <td>{inInicial + index + 1}</td>
               <td>{`${user.usuarioNombre} ${user.usuarioApellidoPaterno} ${user.usuarioApellidoMaterno}`}</td>
               <td>{user.usuarioEmail}</td>
               <td>{user.usuarioTelefono}</td>
               <td>
-                <button type="button" className="btn btn-danger">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                    <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                    </svg>
-                </button>
-                
-                <button type="button" className="btn btn-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera-fill" viewBox="0 0 16 16">
-                      <path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
-                      <path d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4zm.5 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0"/>
-                  </svg>
+                <div style={{width:"50px"}}>
+                <img 
+                    src={user.photo}
+                    className="w-100 h-100 rounded"
+                />
+            </div>
+              </td>
+              <td className="d-flex w-100 justify-content-evenly">
+                <CameraComponent mode={props.mode} onCapture={(image) => handleCapture(user.usuarioTelefono, image)} />  
+                <button 
+                  type="button" 
+                  onClick={()=> removeItem(user.usuarioTelefono)}
+                  className={`
+                    ${props.mode === "dark" ? "btn btn-outline-danger" : "btn btn-danger"} 
+                `}
+                >
+                  <RiDeleteBin6Fill />
                 </button>
               </td>
-            </tr>
+            </motion.tr>
           ))}
+        </AnimatePresence>
         </tbody>
-      </table>
+        </table>
+        </div>
+       
+      </div>
 
       {/**aqui va el formato mobile */}
-    <div className="bg-white  d-flex flex-column gap-2" >
+    <div 
+      className={`d-flex flex-column gap-2 bg-${props.mode} text-bg-${props.mode} d-md-none`}
+    >
+    <AnimatePresence>
     {nData.map((user, index) => (
-      <div key={index} className="border d-flex flex-column p-2 rounded-1">
-        <div className="d-flex justify-content-between pb-2 border-bottom">
-          <div className="text-secondary">
-              {inInicial + index + 1}
+      <motion.div 
+        key={user.usuarioTelefono} 
+        className={`
+          ${props.mode === "dark" ? " d-flex flex-column p-2 rounded-1" : "border d-flex flex-column p-2 rounded-1"} 
+      `}
+      style=
+            {props.mode === "dark" ? { backgroundColor: "#303030", border: "#212529"} : {}}
+        exit={{ opacity: 0, y: 20 }}
+        transition={{ duration: 0.4 }}
+        layout
+      >
+        <div className="d-flex justify-content-between pb-2 "
+          style=
+          {props.mode === "dark" ? { 
+              backgroundColor: "#303030", 
+              borderBottom: "1px solid #212529",  
+              } : {
+                borderBottom: "1px solid #DEE2E6",  
+              }}
+    
+          >
+          <div className="text-secondary d-flex gap-2 align-items-center">
+            <div>{inInicial + index + 1}</div>
+            <div style={{width:"50px"}}>
+              <img 
+                    src={user.photo}
+                    className="w-100 h-100 rounded"
+              />
+            </div>
           </div>
           <div className="d-flex gap-2">
                 
-                <CameraComponent />
-                
-                <button type="button" className="btn btn-danger">
+                <CameraComponent mode={props.mode} onCapture={(image) => handleCapture(user.usuarioTelefono, image)} />
+
+                <button 
+                  type="button" 
+                  onClick={()=> removeItem(user.usuarioTelefono)}
+                  className={`
+                    ${props.mode === "dark" ? "btn btn-outline-danger" : "btn btn-danger"} 
+                `}
+                >
                   <RiDeleteBin6Fill />
                 </button>
           </div>
         </div>
-        <div className="d-flex justify-content-between">
+        <div className="d-flex justify-content-between pt-2">
           <div className=""><strong>Nombre</strong></div>
           <div>{`${user.usuarioNombre} ${user.usuarioApellidoPaterno} ${user.usuarioApellidoMaterno}`}</div>
         </div>
@@ -130,14 +259,20 @@ const DataTable = () => {
           <div className=""><strong>Email</strong></div>
           <div>{user.usuarioTelefono}</div>
         </div>
-      </div>
+      </motion.div>
     ))}
+    </AnimatePresence>
     </div>
+      
+
+      {/**aqui va la paginacion*/}
       <div className="d-flex justify-content-around mt-3">
         <button 
           disabled={currentPage === 1} 
           onClick={() => setCurrentPage(currentPage - 1)}
-          className="border bg-transparent border-0"
+          className={`
+            ${props.mode === "dark" ? "border bg-transparent border-0 text-white" : "border bg-transparent border-0"} 
+        `}
         >
           <BsArrowLeft />
         </button>
@@ -145,7 +280,9 @@ const DataTable = () => {
         <button 
           disabled={currentPage === totalPages} 
           onClick={() => setCurrentPage(currentPage + 1)}
-          className="border bg-transparent border-0"
+          className={`
+            ${props.mode === "dark" ? "border bg-transparent border-0 text-white" : "border bg-transparent border-0"} 
+        `}
         >
           <BsArrowRight />
         </button>

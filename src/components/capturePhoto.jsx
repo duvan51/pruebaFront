@@ -4,24 +4,26 @@ import { MdAddAPhoto } from "react-icons/md";
 
 
 
-const CameraComponent = () => {
+const CameraComponent = ({onCapture, mode}) => {
   const webcamRef = useRef(null);
   const [image, setImage] = useState(null);
 
   const capture = () => {
     const imageSrc = webcamRef.current.getScreenshot();
     setImage(imageSrc);
+    onCapture(imageSrc)
   };
 
- // console.log("")
-
+ 
   return (
     <>
       <button
         type="button"
-        className="btn btn-primary"
         data-bs-toggle="modal"
         data-bs-target="#staticBackdrop"
+        className={`
+          ${mode === "dark" ? "btn btn-outline-primary" : "btn btn-primary"} 
+      `}
       >
          <MdAddAPhoto />
       </button>
@@ -35,17 +37,18 @@ const CameraComponent = () => {
         aria-labelledby="staticBackdropLabel"
         aria-hidden="true"
       >
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="staticBackdropLabel">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
                 Modal title
               </h1>
               <button
                 type="button"
-                class="btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"
+                
+                
               ></button>
             </div>
             <div class="modal-body">

@@ -12,3 +12,5 @@ export const GetAllUsers = async ()=>{
         throw error
     }
 }
+
+

@@ -1,2 +1,9 @@
+.dark-mode::placeholder {
+    color: #bdbdbd !important;
+    opacity: 1;
+    border: none !important;
+}
 
-
+.dark-button-delete{
+    background-Color: "#D32F2F",
+}
