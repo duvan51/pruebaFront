@@ -103,14 +103,16 @@ const normalizeText = (text) => {
   return (
     <>
     <div className={`p-3 bg-${props.mode} w-100`}>
+       
+       {/**aqui va el input*/}
       <div className="mb-4"> 
         <input
           className={`
               form-control 
-              ${props.mode === "dark" ? "dark-mode text-white" : "bg-light text-black"} 
+              ${props.mode === "dark" ? "dark-mode text-white" : "text-black"} 
           `}
           style=
-            {props.mode === "dark" ? { backgroundColor: "#5F6368", border: "none", outline: "none", boxShadow: "none"} : {}}
+            {props.mode === "dark" ? { backgroundColor: "#5F6368", border: "none", outline: "none", boxShadow: "none"} : {backgroundColor: "white"}}
           id="exampleDataList"
           placeholder="Escribe un nombre..."
           onChange={handleChange}
@@ -157,7 +159,7 @@ const normalizeText = (text) => {
         <tbody className="w-100 rounded-1">
         <AnimatePresence>
           {nData.map((user, index) => (
-            <motion.tr  key={user.usuarioTelefono}
+            <motion.tr  key={index && user.usuarioTelefono}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.4 }}
             layout
@@ -203,7 +205,7 @@ const normalizeText = (text) => {
     <AnimatePresence>
     {nData.map((user, index) => (
       <motion.div 
-        key={user.usuarioTelefono} 
+        key={index && user.usuarioTelefono} 
         className={`
           ${props.mode === "dark" ? " d-flex flex-column p-2 rounded-1" : "border d-flex flex-column p-2 rounded-1"} 
       `}

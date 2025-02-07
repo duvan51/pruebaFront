@@ -2,56 +2,47 @@ import React, { useRef, useState } from "react";
 import Webcam from "react-webcam";
 import { MdAddAPhoto } from "react-icons/md";
 
-
-
-const CameraComponent = ({onCapture, mode}) => {
+const CameraComponent = ({ onCapture, mode }) => {
   const webcamRef = useRef(null);
   const [image, setImage] = useState(null);
+
+  const [show, setShow] = useState(false);
 
   const capture = () => {
     const imageSrc = webcamRef.current.getScreenshot();
     setImage(imageSrc);
-    onCapture(imageSrc)
+    onCapture(imageSrc);
+  };
+  const clearImage = () => {
+    setImage(null);
   };
 
- 
+
+
+  console.log(show)
   return (
     <>
       <button
         type="button"
         data-bs-toggle="modal"
         data-bs-target="#staticBackdrop"
-        className={`
-          ${mode === "dark" ? "btn btn-outline-primary" : "btn btn-primary"} 
-      `}
+        className={`btn ${mode === "dark" ? "btn-outline-primary" : "btn-primary"}`}
+        onClick={() => setShow(true)}
       >
-         <MdAddAPhoto />
+        <MdAddAPhoto />
       </button>
 
-      <div
-        class="modal fade"
-        id="staticBackdrop"
-        data-bs-backdrop="static"
-        data-bs-keyboard="false"
-        tabindex="-1"
-        aria-labelledby="staticBackdropLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog">
+      <>
+      {show && (
+        <div className="modal fade show d-block" tabIndex="-1" style={{ background: "rgba(0, 0, 0, 0.5)" }}>
+          <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                Modal title
+                Tomar foto
               </h1>
-              <button
-                type="button"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-                
-                
-              ></button>
             </div>
-            <div class="modal-body">
+            <div className="modal-body">
               <div>
                 <Webcam
                   ref={webcamRef}
@@ -59,25 +50,32 @@ const CameraComponent = ({onCapture, mode}) => {
                   width={400}
                   height={300}
                 />
-                <button onClick={capture}>Tomar Foto</button>
-                {image && <img src={image} alt="Captura" />}
+                
+                {image && <img src={image} alt="Captura" className="mt-3 img-fluid" />}
               </div>
             </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
+            <div className="modal-footer">
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
                 data-bs-dismiss="modal"
+                onClick={() => { 
+                  clearImage(); 
+                  setShow(false); 
+                }}
+                
               >
-                Close
+                Cerrar
               </button>
-              <button type="button" class="btn btn-primary">
-                Understood
+              <button className="btn btn-success mt-2" onClick={capture}>
+                  Tomar Foto
               </button>
             </div>
           </div>
+          </div>
         </div>
-      </div>
+      )}
+    </>
     </>
   );
 };
