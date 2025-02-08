@@ -34,16 +34,27 @@ const CameraComponent = ({ onCapture, mode }) => {
 
       <>
       {show && (
-        <div className="modal fade show d-block" tabIndex="-1" style={{ background: "rgba(0, 0, 0, 0.5)" }}>
+        <div className="modal fade show d-block" 
+          tabIndex="-1" 
+          style={{ background: "rgba(0, 0, 0, 0.5)" }}
+          
+        >
           <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+          <div 
+               className={`modal-content bg-${mode} text-bg-${mode} `}
+          style=
+          {mode === "dark" ? { backgroundColor: "#5F6368", border: "none"} : {backgroundColor: "white"}}
+          >
+            <div className="modal-header d-flex align-items-center justify-content-center">
+              <h1 
+              id="staticBackdropLabel"
+              className={` ${mode === "dark" ? "modal-title fs-5 .text-light" : "modal-title fs-5 .text-dark"}`}
+              >
                 Tomar foto
               </h1>
             </div>
-            <div className="modal-body">
-              <div>
+            <div className="modal-body d-flex align-items-center justify-content-center">
+              <div className="d-flex flex-column align-items-center justify-content-center">
                 <Webcam
                   ref={webcamRef}
                   screenshotFormat="image/jpeg"
@@ -56,8 +67,14 @@ const CameraComponent = ({ onCapture, mode }) => {
             </div>
             <div className="modal-footer">
               <button 
+                onClick={capture}
+                className={`btn mt-2  ${mode === "dark" ? "btn-outline-success" : "btn-success"}`}
+              >
+                  Tomar Foto
+              </button>
+              <button 
                 type="button" 
-                className="btn btn-secondary" 
+                className={`btn  ${mode === "dark" ? "btn-outline-secondary " : "btn-secondary "}`}
                 data-bs-dismiss="modal"
                 onClick={() => { 
                   clearImage(); 
@@ -67,9 +84,7 @@ const CameraComponent = ({ onCapture, mode }) => {
               >
                 Cerrar
               </button>
-              <button className="btn btn-success mt-2" onClick={capture}>
-                  Tomar Foto
-              </button>
+              
             </div>
           </div>
           </div>

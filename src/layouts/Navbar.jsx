@@ -20,7 +20,7 @@ const Navbar = (props) => {
           
         </div>
         <div className="d-flex">
-            <div onClick={props.toggleMode} className="d-flex" style={{ cursor: "pointer", fontSize: "24px" }}>
+            <div className="d-flex" style={{ cursor: "pointer", fontSize: "24px" }}>
             {props.mode === "dark" ? <MdNightlight className="text-warning" /> : <MdOutlineLightMode className="text-primary" />}
              </div>
         </div>
